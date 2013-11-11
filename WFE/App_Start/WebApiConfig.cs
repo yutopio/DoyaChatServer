@@ -17,7 +17,7 @@ namespace WFE
 
             config.Routes.MapHttpRoute(
                 name: "Send",
-                routeTemplate: "send",
+                routeTemplate: "send/{from}/{to}",
                 defaults: new { controller = "Chat", action = "Send" }
             );
 

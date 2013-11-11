@@ -96,13 +96,15 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\ChatController.cs" />
+    <Content Include="Global.asax" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Controllers\ChatController.cs" />
+    <Compile Include="Models\GoogleCloudMessagingModel.cs" />
+    <Compile Include="Models\JsonApiProxy.cs" />
     <Compile Include="Models\RegisterModel.cs" />
     <Compile Include="WebRole.cs" />
-    <Content Include="Global.asax" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
