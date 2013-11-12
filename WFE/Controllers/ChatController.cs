@@ -17,17 +17,19 @@ namespace WFE.Controllers
 
         static ChatController()
         {
+            CloudStorageAccount storageAccount;
             try
             {
-                var storageAccount = CloudStorageAccount.Parse(
+                storageAccount = CloudStorageAccount.Parse(
                     RoleEnvironment.GetConfigurationSettingValue("StorageConnectionString"));
-
-                Trace.TraceInformation("Creating table client.");
                 var tableClient = storageAccount.CreateCloudTableClient();
                 usersTable = tableClient.GetTableReference("users");
                 usersTable.CreateIfNotExists();
             }
-            catch { }
+            catch
+            {
+                usersTable = null;
+            }
         }
 
         [HttpPost, ActionName("Register")]
@@ -45,6 +47,9 @@ namespace WFE.Controllers
         [HttpPost, ActionName("Send")]
         public void Send(int from, int to, [FromBody] string msg)
         {
+            if (usersTable == null)
+                throw new ApplicationException("usersTable == null");
+
             var registerOp = TableOperation.Retrieve<RegisterModel>("foo", to.ToString());
             var registerResult = usersTable.Execute(registerOp);
             var registerRow = registerResult.Result as RegisterModel;
@@ -65,8 +70,13 @@ namespace WFE.Controllers
         [HttpPost, ActionName("SendFace")]
         public void SendFace(int from, int to, [FromBody] string imgBase64)
         {
+            if (usersTable == null)
+                throw new ApplicationException("usersTable == null");
+
             var buf = Convert.FromBase64String(imgBase64);
             var result = new FaceDetectionModel().Send(buf);
+            var face = result.FaceRecognition.DetectionFaceInfo;
+            if (face == null) return;
 
             var registerOp = TableOperation.Retrieve<RegisterModel>("foo", to.ToString());
             var registerResult = usersTable.Execute(registerOp);
@@ -83,12 +93,12 @@ namespace WFE.Controllers
                             Data = new FacePushModel
                             {
                                 SenderId = from,
-                                Gender = result.FaceRecognition.DetectionFaceInfo.GenderJudge.genderResult,
-                                LeftBrow = 1,
-                                LeftEye = 1,
-                                RightBrow = 1,
-                                RightEye = 1,
-                                Mouth = 1
+                                Gender = face.GenderJudge.genderResult,
+                                LeftBrow = face.BlinkJudge.blinkLevel.leftEye > 50 ? 0 : 1,
+                                LeftEye = face.BlinkJudge.blinkLevel.leftEye > 50 ? 0 : 1,
+                                RightBrow = face.BlinkJudge.blinkLevel.rightEye > 50 ? 0 : 1,
+                                RightEye = face.BlinkJudge.blinkLevel.rightEye > 50 ? 0 : 1,
+                                Mouth = face.SmileJudge.smileLevel > 55 ? 0 : 1
                             }
                         }
                 });
