@@ -15,13 +15,17 @@ namespace WFE.Controllers
 
         static ChatController()
         {
-            var storageAccount = CloudStorageAccount.Parse(
-                RoleEnvironment.GetConfigurationSettingValue("StorageConnectionString"));
+            try
+            {
+                var storageAccount = CloudStorageAccount.Parse(
+                    RoleEnvironment.GetConfigurationSettingValue("StorageConnectionString"));
 
-            Trace.TraceInformation("Creating table client.");
-            var tableClient = storageAccount.CreateCloudTableClient();
-            usersTable = tableClient.GetTableReference("users");
-            usersTable.CreateIfNotExists();
+                Trace.TraceInformation("Creating table client.");
+                var tableClient = storageAccount.CreateCloudTableClient();
+                usersTable = tableClient.GetTableReference("users");
+                usersTable.CreateIfNotExists();
+            }
+            catch { }
         }
 
         [HttpPost, ActionName("Register")]
@@ -34,7 +38,7 @@ namespace WFE.Controllers
         }
 
         [HttpPost, ActionName("Send")]
-        public void Send(int from, int to, string msg)
+        public void Send(int from, int to, [FromBody] string msg)
         {
             var registerOp = TableOperation.Retrieve<RegisterModel>("foo", to.ToString());
             var registerResult = usersTable.Execute(registerOp);
@@ -54,7 +58,7 @@ namespace WFE.Controllers
         }
 
         [HttpPost, ActionName("SendFace")]
-        public void SendFace(int from, int to, string imgBase64)
+        public void SendFace(int from, int to, [FromBody] string imgBase64)
         {
             Convert.FromBase64String(imgBase64);
 

@@ -104,6 +104,7 @@
     <Compile Include="Models\GoogleCloudMessagingModel.cs" />
     <Compile Include="Models\JsonApiProxy.cs" />
     <Compile Include="Models\RegisterModel.cs" />
+    <Compile Include="TextMediaTypeFormatter.cs" />
     <Compile Include="WebRole.cs" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">

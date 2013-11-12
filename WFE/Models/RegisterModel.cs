@@ -22,13 +22,13 @@ namespace WFE.Models
         public string ETag
         {
             get { return "*"; }
-            set { throw new NotImplementedException(); }
+            set { return; }
         }
 
         public string PartitionKey
         {
             get { return "foo"; }
-            set { throw new NotImplementedException(); }
+            set { return; }
         }
 
         public void ReadEntity(IDictionary<string, EntityProperty> properties,
@@ -41,7 +41,12 @@ namespace WFE.Models
         public string RowKey
         {
             get { return Id.ToString(); }
-            set { Id = int.Parse(value); }
+            set
+            {
+                int id;
+                int.TryParse(value, out id);
+                Id = id;
+            }
         }
 
         public DateTimeOffset Timestamp { get; set; }
