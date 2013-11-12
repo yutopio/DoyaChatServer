@@ -65,7 +65,8 @@ namespace WFE.Controllers
         [HttpPost, ActionName("SendFace")]
         public void SendFace(int from, int to, [FromBody] string imgBase64)
         {
-            Convert.FromBase64String(imgBase64);
+            var buf = Convert.FromBase64String(imgBase64);
+            var result = new FaceDetectionModel().Send(buf);
 
             var registerOp = TableOperation.Retrieve<RegisterModel>("foo", to.ToString());
             var registerResult = usersTable.Execute(registerOp);
@@ -79,7 +80,16 @@ namespace WFE.Controllers
                         new DoyaMessage<FacePushModel>
                         {
                             Tag = "face",
-                            Data = new FacePushModel { SenderId = from }
+                            Data = new FacePushModel
+                            {
+                                SenderId = from,
+                                Gender = result.FaceRecognition.DetectionFaceInfo.GenderJudge.genderResult,
+                                LeftBrow = 1,
+                                LeftEye = 1,
+                                RightBrow = 1,
+                                RightEye = 1,
+                                Mouth = 1
+                            }
                         }
                 });
         }
