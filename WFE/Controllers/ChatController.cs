@@ -4,6 +4,8 @@ using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Security.Cryptography;
+using System.Text;
 using System.Web.Http;
 using WFE.Models;
 
@@ -31,7 +33,10 @@ namespace WFE.Controllers
         [HttpPost, ActionName("Register")]
         public RegisterModel Register(RegisterModel reg)
         {
-            reg.Id = (int)DateTime.Now.Ticks;
+            var md5 = MD5.Create();
+            var inputBytes = Encoding.ASCII.GetBytes(reg.GcmId);
+            var hash = md5.ComputeHash(inputBytes);
+            reg.Id = (((int)hash[0] << 24) | ((int)hash[1] << 16) | ((int)hash[2] << 8) | (int)hash[3]);
             var registerOp = TableOperation.InsertOrReplace(reg);
             var registerResult = usersTable.Execute(registerOp);
             return new RegisterModel { Id = reg.Id };
